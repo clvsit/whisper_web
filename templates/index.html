@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Whisper Web</title>
+    <link href="/static/style/daisyui.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="drawer">
+        <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content">
+            <!-- Page content here -->
+            <div class="navbar" style="position: absolute; left: 0;">
+                <div class="flex-none">
+                    <label for="my-drawer" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            class="inline-block w-5 h-5 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </label>
+                </div>
+                <div class="flex-1">
+                    <a class="btn btn-ghost normal-case text-xl">Voice Demo</a>
+                </div>
+            </div>
+
+            <div class="hero min-h-screen" style="background-image: url('static/images/background.jpg');">
+                <div class="hero-overlay bg-opacity-60"></div>
+                <div class="hero-content text-center text-neutral-content">
+                    <div class="max-w-md">
+                        <h1 class="mb-5 text-5xl font-bold">Voice 产品 Demo</h1>
+                        <p class="mb-5">展示 Voice 部门研究成果、算法落地产品</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="drawer-side">
+            <label for="my-drawer" class="drawer-overlay"></label>
+            <ul class="menu p-4 w-80 bg-base-100 text-base-content">
+                <!-- Sidebar content here -->
+                <li><a href="/whisper">whisper 音频转文本</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="/static/script/daisyui.min.js"></script>
+    <script>
+        window.onload = function () {
+            const btnDom = document.getElementById("skipMain");
+
+            btnDom.addEventListener("click", () => {
+                location.href = "/main";
+            }, false);
+        }
+    </script>
+</body>
+
+</html>

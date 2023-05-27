@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Whisper Web</title>
+    <link href="/static/style/daisyui.css" rel="stylesheet" type="text/css" />
+    <link href="/static/style/main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="drawer">
+            <input id="my-drawer" type="checkbox" class="drawer-toggle" />
+            <div class="drawer-content">
+                <!-- Page content here -->
+                <div class="navbar">
+                    <div class="flex-none">
+                        <label for="my-drawer" class="btn btn-square btn-ghost">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                class="inline-block w-5 h-5 stroke-current">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="flex-1">
+                        <a href="/" class="btn btn-ghost normal-case text-xl">Voice Demo</a>
+                    </div>
+                    <div class="flex-none">
+                        <ul class="menu menu-horizontal px-1">
+
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="main" class="main">
+                    <div class="w-full mt-5">
+                        <div class="flex w-full">
+                            <div class="flex-row-center flex-grow card bg-base-300 rounded-box place-items-center w-50">
+                                <label class="swap">
+                                    <input type="checkbox" />
+                                    <div @click="stopRecord" class="btn btn-success swap-off">开启录音</div>
+                                    <div @click="startRecord" class="btn btn-error swap-on">关闭录音</div>
+                                </label>
+                                <label v-if="recorder.method === 1">
+                                    <div class="badge">被选中</div>
+                                </label>
+                            </div>
+                            <div class="divider divider-horizontal">AND</div>
+                            <div class="grid flex-grow card bg-base-300 rounded-box place-items-center w-50">
+                                <form>
+                                    <input id="inferFile" type="file" class="file-input w-full max-w-xs"
+                                        accept="audio/mp3" />
+                                    <div v-if="recorder.method === 2" class="badge">被选中</div>
+                                </form>
+                            </div>
+
+                        </div>
+                        <div class="flex-center w-full mt-5">
+                            <div @click="request('infer')" class="btn btn-primary">进行推断</div>
+                        </div>
+
+                        <div v-if="result.isRun" class="flex w-full mt-5">
+                            <progress class="progress w-100"></progress>
+                        </div>
+
+                        <div class="delimiter"></div>
+
+                        <div id="resultPanel" class="result-panel">
+                            <div v-if="result.isHave" class="result-panel-wrap bg-base-300 rounded-box">
+                                <div v-for="item in result.list">
+                                    <div v-if="item.type === 'robot'" class="chat chat-start">
+                                        <div class="chat-image avatar">
+                                            <div class="w-10 rounded-full">
+                                                <img src="/static/images/avatar_2.png" />
+                                            </div>
+                                        </div>
+                                        <div class="chat-header">
+                                            音频文本
+                                            <time class="text-xs opacity-50" v-text="item.time"></time>
+                                        </div>
+                                        <div class="chat-bubble flex place-items-center" v-text="item.text"></div>
+                                    </div>
+                                    <div v-else class="chat chat-start">
+                                        <div class="chat-image avatar">
+                                            <div class="w-10 rounded-full">
+                                                <img src="/static/images/avatar.jpg" />
+                                            </div>
+                                        </div>
+                                        <div class="chat-header">
+                                            原始录音
+                                            <time class="text-xs opacity-50" v-text="item.time"></time>
+                                        </div>
+                                        <div class="chat-bubble flex place-items-center"
+                                            v-html="'<audio src=' + item.audio + ' controls>'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <img v-else src="/static/images/no-content.png" />
+                        </div>
+                    </div>
+                </div>
+
+                <canvas class="particle-background"></canvas>
+
+            </div>
+
+
+            <div class="drawer-side">
+                <label for="my-drawer" class="drawer-overlay"></label>
+                <ul class="menu p-4 w-80 bg-base-100 text-base-content">
+                    <!-- Sidebar content here -->
+                    <li><a href="/sound_changer">变声器</a></li>
+                    <li><a href="/voice_feature_extractor">声纹特征抽取</a></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div v-if="alert.isShow" class="alert-wrap">
+            <div class="alert shadow-lg" :class="'alert-' + alert.type">
+                <div>
+                    <svg v-if="alert.type === 'error'" xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span v-text="alert.msg"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/static/script/daisyui.min.js"></script>
+    <script src="/static/script/particles.min.js"></script>
+    <script src="/static/script/jquery.min.js"></script>
+    <script src="/static/script/vue.min.js"></script>
+    <script src="/static/script/recorder/recorder-core.js"></script>
+    <script src="/static/script/recorder/extensions/lib.fft.js"></script>
+    <script src="/static/script/recorder/engine/wav.js"></script>
+    <script>
+        const vue = new Vue({
+            el: "#app",
+            data: {
+                file: {
+                    infer: {
+                        list: []
+                    },
+                },
+                input: {
+                    voice: ""
+                },
+                recorder: {
+                    obj: null,
+                    method: 0, // 0 表示没有操作，1 表示录音，2 表示文件
+                },
+                result: {
+                    isHave: false,
+                    isRun: false,
+                    list: []
+                },
+                alert: {
+                    isShow: false,
+                    type: "info",
+                    msg: ""
+                },
+                panel: 0
+            },
+            created() {
+                let _this = this;
+
+                this.$nextTick(() => {
+                    _this.setHeight();
+                    Particles.init({
+                        selector: '.particle-background',
+                        maxParticles: 450
+                    });
+                    $("#inferFile").on("change", () => {
+                        _this.changeFileItemByFile("infer");
+                    });
+                });
+
+                let recorder = Recorder({
+                    type: "wav",
+                    sampleRate: 24000,
+                    bitRate: 16
+                });
+
+                recorder.open(() => {
+                    console.log("已打开录音，可以点击录制开始录音了");
+                });
+                this.recorder.obj = recorder;
+            },
+            methods: {
+                setHeight() {
+                    this.$nextTick(() => {
+                        let height = document.documentElement.clientHeight;
+
+                        document.getElementById("app").style.height = (height - 1) + "px";
+                        $("#main").height(height - 172);
+                        $("#mainBody").height(height - 252);
+                        $("#resultPanel").height(height - 372);
+                    });
+                },
+                startRecord() {
+                    this.recorder.blob = null;
+                    this.recorder.status = 1;
+                    this.recorder.obj.start();
+                },
+                stopRecord() {
+                    let _this = this;
+
+                    this.recorder.status = 0;
+                    this.recorder.obj.stop((blob, duration) => {
+                        console.log(blob, (window.URL || webkitURL).createObjectURL(blob), "时长:" + duration + "ms");
+                        _this.recorder.blob = blob;
+
+                        const reader = new FileReader();
+
+                        reader.readAsDataURL(_this.recorder.blob);
+                        reader.onload = function (e) {
+                            _this.recorder.blob = e.target.result;
+                        }
+                    }, (msg) => {
+                        console.log(msg);
+                    });
+                },
+                openAlert(times) {
+                    let _this = this;
+
+                    this.alert.isShow = true;
+
+                    if (times > 0) {
+                        setTimeout(() => {
+                            _this.alert.isShow = false;
+                            _this.alert.msg = "";
+                        }, times);
+                    }
+                },
+
+                changeFileItemByFile(type) {
+                    let fileList = $("#" + type + "File")[0].files;
+
+                    console.dir(fileList);
+
+                    for (let i = 0; i < fileList.length; i++) {
+                        const fileItem = fileList[i];
+
+                        if (type === "infer" && (fileItem.type === "audio/mpeg")) {
+                            this.file.infer = {
+                                name: fileItem.name,
+                                // size: this.getFileSize(fileItem.size),
+                                type: fileItem.type,
+                                status: "no-upload",
+                                file: fileItem
+                            };
+                        }
+                        else {
+                            console.log(fileItem.type);
+                            this.alert.msg = "上传文件类型 " + fileItem.type + " 不支持，请上传 mp3 格式的音频文件";
+                            this.alert.type = "error";
+                            this.openAlert(3000);
+                        }
+                    }
+
+                    if (type === "infer") {
+                        const reader = new FileReader(),
+                            _this = this;
+
+                        // 将文件以 Data URL 形式读入页面
+                        reader.readAsDataURL(this.file.infer.file);
+                        reader.onload = function (e) {
+                            _this.recorder.blob = this.result;
+                            _this.recorder.method = 2;
+                        }
+                    }
+                },
+
+                request(type) {
+                    let _this = this;
+
+                    if (type === "infer") {
+                        const timer = new Date(),
+                            hour = timer.getHours(),
+                            minute = timer.getMinutes(),
+                            _this = this;
+
+                        // if (this.input.voice === "") {
+                        //     this.alert.msg = "请选择音色后，再进行推断";
+                        //     this.alert.type = "error";
+                        //     this.openAlert(3000);
+                        //     return;
+                        // }
+
+                        this.result.list.unshift({
+                            type: "user",
+                            time: hour + "." + minute,
+                            audio: _this.recorder.blob
+                        });
+                        // this.result.isHave = true;
+                        // console.log(this.result.list);
+                        console.log(_this.recorder.blob);
+
+                        this.result.isRun = true;
+                        setTimeout(() => {
+                            $.ajax({
+                                method: "POST",
+                                url: "/whisper/transcribe",
+                                data: JSON.stringify({
+                                    data: (/.+;\s*base64\s*,\s*(.+)$/i.exec(_this.recorder.blob) || [])[1]
+                                }),
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                success(resp) {
+                                    console.log(resp);
+                                    _this.result.list.unshift({
+                                        type: "robot",
+                                        time: hour + "." + minute,
+                                        text: resp.data.text
+                                    });
+                                },
+                                error(status) {
+                                    console.log(status);
+                                },
+                                complete() {
+                                    _this.result.isRun = false;
+                                }
+                            });
+                            _this.result.isHave = true;
+                        }, 1000);
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
