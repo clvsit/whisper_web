@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 
-from core.entry import whisper_blue
+from core.module.model import whisper_blue
 
 
 app = Flask(__name__)
