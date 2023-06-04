@@ -7,6 +7,7 @@
     <title>Whisper Web</title>
     <link href="/static/style/daisyui.css" rel="stylesheet" type="text/css" />
     <link href="/static/style/main.css" rel="stylesheet" type="text/css" />
+    <link href="/static/style/page/whisper.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -38,73 +39,104 @@
                 <div id="main" class="main">
                     <div class="w-full mt-5">
                         <div class="flex w-full">
-                            <div class="flex-row-center flex-grow card bg-base-300 rounded-box place-items-center w-50">
-                                <label class="swap">
-                                    <input type="checkbox" />
-                                    <div @click="stopRecord" class="btn btn-success swap-off">开启录音</div>
-                                    <div @click="startRecord" class="btn btn-error swap-on">关闭录音</div>
-                                </label>
-                                <label v-if="recorder.method === 1">
-                                    <div class="badge">被选中</div>
-                                </label>
-                            </div>
-                            <div class="divider divider-horizontal">OR</div>
-                            <div class="grid flex-grow card bg-base-300 rounded-box place-items-center w-50">
-                                <form>
-                                    <input id="inferFile" type="file" class="file-input w-full max-w-xs"
-                                        accept="audio/mp3" />
-                                    <div v-if="recorder.method === 2" class="badge">被选中</div>
-                                </form>
-                            </div>
+                            <!-- 左侧任务区域 -->
+                            <div class="w-50">
 
-                        </div>
-                        <div class="flex-center w-full mt-5">
-                            <div @click="request('infer')" class="btn btn-primary">进行推断</div>
-                        </div>
+                                <div class="input-area">
+                                    <div class="w-50">
+                                        <div class="form-control">
+                                            <label class="label cursor-pointer">
+                                                <span class="label-text mr-5">音频类型：</span>
+                                                <span class="mr-2">在线录音</span>
+                                                <input v-model="recorder.method" type="radio" name="inputType" value="1" class="radio mr-5" />
+                                                <span class="mr-2">音频文件</span>
+                                                <input v-model="recorder.method" type="radio" name="inputType" value="2" class="radio" />
+                                            </label>
+                                        </div>
+                                        <div class="input-main-body mt-3">
+                                            <label v-if="recorder.method == 1" class="swap">
+                                                <input type="checkbox" />
+                                                <div @click="stopRecord" class="btn btn-success swap-off">开启录音</div>
+                                                <div @click="startRecord" class="btn btn-error swap-on">关闭录音</div>
+                                            </label>
+                                            <form v-else>
+                                                <input id="inferFile" type="file" class="file-input file-input-bordered w-full"
+                                                    accept="audio/mp3" />
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="divider divider-horizontal">AND</div>
+                                    <div class="w-50">
+                                        <div class="form-control">
+                                            <label class="label cursor-pointer">
+                                                <span class="label-text"><b>模型规模：</b></span>
+                                            </label>
+                                        </div>
+                                        <select class="select select-bordered w-full mt-3">
+                                            <option selected>small</option>
+                                            <option>medium</option>
+                                        </select>
+                                    </div>
 
-                        <div v-if="result.isRun" class="flex w-full mt-5">
-                            <progress class="progress w-100"></progress>
-                        </div>
+                                </div>
+                                <div class="flex-center w-full mt-5">
+                                    <div v-if="result.isRun" class="btn btn-primary" disabled>进行推断</div>
+                                    <div v-else @click="request('infer')" class="btn btn-primary">进行推断</div>
+                                </div>
 
-                        <div class="delimiter"></div>
+                                <div v-if="result.isRun" class="flex w-full mt-5">
+                                    <progress class="progress w-100"></progress>
+                                </div>
 
-                        <div id="resultPanel" class="result-panel">
-                            <div v-if="result.isHave" class="result-panel-wrap bg-base-300 rounded-box">
-                                <div v-for="item in result.list">
-                                    <div v-if="item.type === 'robot'" class="chat chat-start">
-                                        <div class="chat-image avatar">
-                                            <div class="w-10 rounded-full">
-                                                <img src="/static/images/avatar_2.png" />
+                                <div class="delimiter"></div>
+
+                                <div id="resultPanel" class="result-panel">
+                                    <div v-if="result.isHave" class="result-panel-wrap rounded-box">
+                                        <div v-for="item in result.list">
+                                            <div v-if="item.type === 'robot'" class="chat chat-start">
+                                                <div class="chat-image avatar">
+                                                    <div class="w-10 rounded-full">
+                                                        <img src="/static/images/avatar_2.png" />
+                                                    </div>
+                                                </div>
+                                                <div class="chat-header">
+                                                    音频文本
+                                                    <time class="text-xs opacity-50" v-text="item.time"></time>
+                                                </div>
+                                                <div class="chat-bubble flex place-items-center" v-text="item.text">
+                                                </div>
+                                            </div>
+                                            <div v-else class="chat chat-start">
+                                                <div class="chat-image avatar">
+                                                    <div class="w-10 rounded-full">
+                                                        <img src="/static/images/avatar.jpg" />
+                                                    </div>
+                                                </div>
+                                                <div class="chat-header">
+                                                    原始录音
+                                                    <time class="text-xs opacity-50" v-text="item.time"></time>
+                                                </div>
+                                                <div class="chat-bubble flex place-items-center"
+                                                    v-html="'<audio src=' + item.audio + ' controls>'"></div>
                                             </div>
                                         </div>
-                                        <div class="chat-header">
-                                            音频文本
-                                            <time class="text-xs opacity-50" v-text="item.time"></time>
-                                        </div>
-                                        <div class="chat-bubble flex place-items-center" v-text="item.text"></div>
                                     </div>
-                                    <div v-else class="chat chat-start">
-                                        <div class="chat-image avatar">
-                                            <div class="w-10 rounded-full">
-                                                <img src="/static/images/avatar.jpg" />
-                                            </div>
-                                        </div>
-                                        <div class="chat-header">
-                                            原始录音
-                                            <time class="text-xs opacity-50" v-text="item.time"></time>
-                                        </div>
-                                        <div class="chat-bubble flex place-items-center"
-                                            v-html="'<audio src=' + item.audio + ' controls>'"></div>
-                                    </div>
+                                    <img v-else src="/static/images/no-content.png" />
                                 </div>
                             </div>
-                            <img v-else src="/static/images/no-content.png" />
+
+                            <div class="divider divider-horizontal">AND</div>
+
+                            <!-- 右侧列表区域 -->
+                            <div class="grid flex-grow card bg-base-300 rounded-box place-items-center w-50">
+
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
                 <canvas class="particle-background"></canvas>
-
             </div>
 
 
@@ -154,7 +186,7 @@
                 },
                 recorder: {
                     obj: null,
-                    method: 0, // 0 表示没有操作，1 表示录音，2 表示文件
+                    method: 2, // 0 表示没有操作，1 表示录音，2 表示文件
                 },
                 result: {
                     isHave: false,
@@ -201,7 +233,7 @@
                         document.getElementById("app").style.height = (height - 1) + "px";
                         $("#main").height(height - 172);
                         $("#mainBody").height(height - 252);
-                        $("#resultPanel").height(height - 372);
+                        $("#resultPanel").height(height - 432);
                     });
                 },
                 startRecord() {

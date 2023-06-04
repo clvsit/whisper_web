@@ -1,4 +1,4 @@
-# import whisper
+import whisper
 
 
 class WhisperController:
