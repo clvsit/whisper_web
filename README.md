@@ -1,4 +1,5 @@
 # Whisper-Flask Transcription Service
+[[中文版]](https://github.com/clvsit/whisper_web/blob/master/README_zh.md)
 
 This project utilizes OpenAI's Whisper model to create a Flask web service that allows users to upload audio files and receive transcriptions. The service is designed to be user-friendly and efficient, providing a simple interface for users to convert their audio content into text format. Once the audio file is uploaded, the Whisper model processes the audio and the resulting transcription is displayed on the web page.
 

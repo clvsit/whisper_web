@@ -83,4 +83,4 @@
 3. 选择文件后，点击“进行转录”按钮开始转录过程。
 4. 等待转录完成。转录的文本将显示在页面上。
 
-![demo](https://markdown-picture-clvsit.oss-cn-hangzhou.aliyuncs.com/work/whisper_web/whisper_web_demo.png)
+![demo](https://raw.githubusercontent.com/clvsit/whisper_web/master/img/demo.png)
