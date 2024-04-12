@@ -1,0 +1,23 @@
+.input-area {
+    display: flex;
+    width: 100%;
+    height: 130px;
+}
+
+.input-area .form-control {
+    flex-direction: row !important;
+}
+
+.input-area .label {
+    height: 40px;
+}
+
+.input-area .label .label-text {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.input-area .input-main-body {
+    width: 100%;
+    height: 70px;
+}
