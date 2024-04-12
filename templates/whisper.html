@@ -67,7 +67,7 @@
                                             </form>
                                         </div>
                                     </div>
-                                    <div class="divider divider-horizontal">AND</div>
+                                    <!-- <div class="divider divider-horizontal">AND</div>
                                     <div class="w-50">
                                         <div class="form-control">
                                             <label class="label cursor-pointer">
@@ -78,12 +78,12 @@
                                             <option selected>small</option>
                                             <option>medium</option>
                                         </select>
-                                    </div>
+                                    </div> -->
 
                                 </div>
                                 <div class="flex-center w-full mt-5">
-                                    <div v-if="result.isRun" class="btn btn-primary" disabled>进行推断</div>
-                                    <div v-else @click="request('infer')" class="btn btn-primary">进行推断</div>
+                                    <div v-if="result.isRun" class="btn btn-primary" disabled>进行转录</div>
+                                    <div v-else @click="request('infer')" class="btn btn-primary">进行转录</div>
                                 </div>
 
                                 <div v-if="result.isRun" class="flex w-full mt-5">
